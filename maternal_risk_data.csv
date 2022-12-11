@@ -1,4 +1,4 @@
-﻿id,Age,SystolicBP,DiastolicBP,BS,BodyTemp,HeartRate,RiskLevel
+﻿idmr,WomenAge,SystolicBP,DiastolicBP,BS,BodyTemp,HeartRate,RiskLevel
 1,25,130,80,15,98,86,high risk
 2,35,140,90,13,98,70,high risk
 3,29,90,70,8,100,80,high risk
