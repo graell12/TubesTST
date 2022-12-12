@@ -78,6 +78,23 @@ class View(Resource):
             cursor.close()
             conn.close()
 
+class ViewbyID(Resource):
+    @token_required
+    def get(self, get_idmr):
+        try:
+            conn = db.connect()
+            cursor = conn.cursor()
+            print(get_idmr)
+            cursor.execute(f"""SELECT * FROM MATERNAL_RISK WHERE idmr = {get_idmr}""")
+            print(1)
+            rows = cursor.fetchall()
+            return jsonify(rows)
+        except Exception as e:
+            print(e)
+        finally:
+            cursor.close()
+            conn.close()
+
 class ViewRisk(Resource):
     @token_required
     def get(self, get_risk):
@@ -100,7 +117,7 @@ class Insert(Resource):
         try:
             conn = db.connect()
             cursor = conn.cursor()
-            _womanage = int(request.form['WomenAge'])
+            _womanage = int(request.form['Age'])
             _systolicbp = int(request.form['SystolicBP'])
             _diastolicbp = int(request.form['DiastolicBP'])
             _bs = float(request.form['BS'])
@@ -127,15 +144,14 @@ class Update(Resource):
         try:
             conn = db.connect()
             cursor = conn.cursor()
-            up_risk = up_risk.replace("-", " ")
-            _womenage = request.form['WomenAge']
+            _womenage = request.form['Age']
             _systolicbp = int(request.form['SystolicBP'])
             _diastolicbp = int(request.form['DiastolicBP'])
             _bs = float(request.form['BS'])
             _bodytemp = float(request.form['BodyTemp'])
             _heartrate = request.form['HeartRate']
             _risk = request.form['RiskLevel']
-            updateval = f"""UPDATE MATERNAL_RISK SET WomenAge = {_womenage}, SystolicBP = {_systolicbp}, DiastolicBP = {_diastolicbp}, BS = {_bs}, BodyTemp = {_bodytemp}, HeartRate = {_heartrate}, RiskLevel = {_risk} WHERE IDMR = {up_idmr}'"""      
+            updateval = f"""UPDATE MATERNAL_RISK SET WomenAge = {_womenage}, SystolicBP = {_systolicbp}, DiastolicBP = {_diastolicbp}, BS = {_bs}, BodyTemp = {_bodytemp}, HeartRate = {_heartrate}, RiskLevel = '{_risk}' WHERE IDMR = {up_idmr}"""      
             cursor.execute(updateval)
             conn.commit()
             response = jsonify(message='Data in the dataset updated successfully.', id=cursor.lastrowid)
@@ -155,7 +171,7 @@ class Erase(Resource):
         try:
             conn = db.connect()
             cursor = conn.cursor()
-            delval = f"""DELETE FROM MATERNAL_RISK WHERE IDMR = {del_idmr}'"""
+            delval = f"""DELETE FROM MATERNAL_RISK WHERE IDMR = {del_idmr}"""
             cursor.execute(delval)
             conn.commit()
             response = jsonify(message='Data in the dataset deleted successfully.', id=cursor.lastrowid)
@@ -265,6 +281,7 @@ api.add_resource(Register, '/register')
 api.add_resource(MainPage, '/')
 api.add_resource(View, '/maternalrisk')
 api.add_resource(ViewRisk, '/maternalrisk/<string:get_risk>')
+api.add_resource(ViewbyID, '/maternalrisk/<int:get_idmr>')
 api.add_resource(Insert, '/maternalrisk/insert')
 api.add_resource(Update, '/maternalrisk/update/<int:up_idmr>') 
 api.add_resource(Erase, '/maternalrisk/delete/<int:del_idmr>')
