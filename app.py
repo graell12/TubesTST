@@ -46,6 +46,7 @@ def token_required(f) :
             return response
         return f(*args, **kwargs)
     return decorated
+    
 
 #Get All
 class MainPage(Resource):
@@ -84,9 +85,7 @@ class ViewbyID(Resource):
         try:
             conn = db.connect()
             cursor = conn.cursor()
-            print(get_idmr)
             cursor.execute(f"""SELECT * FROM MATERNAL_RISK WHERE idmr = {get_idmr}""")
-            print(1)
             rows = cursor.fetchall()
             return jsonify(rows)
         except Exception as e:
@@ -257,7 +256,7 @@ class Login(Resource):
 
             # check if password is correct
             if bcrypt.checkpw(password.encode('utf-8'), rows[0][2].encode('utf-8')):
-                token = jwt.encode({'username': username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, app.config['SECRET_KEY'])
+                token = jwt.encode({'username': username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
                 response = jsonify(message = 'User logged in successfully.', token = token)
                 # create token for user
                 response.status_code = 200
