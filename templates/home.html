@@ -9,8 +9,13 @@
         <h2>Welcome</h2>
         {% if session['name'] %}
         <p>You're logged in as {{ session['name'] }}</p>
+        <br>
+        <div class="form-group">
+            <button onclick="document.location='dashboard'" type="submit" class="btn btn-primary">Dashboard</button>
+        </div>
         {% else %}
-        <p>Not logged in yet</p>
+        <p>Not logged in yet.</p>
+        <p>Please log in.</p>
         {% endif %}
     </div>
 </div>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Data</title>
+    <link rel="stylesheet" href="static/create.css">
+</head>
+
+<body>
+    <h3>Please fill listed fields and press Submit to insert data.</h3>
+    <div class="container">
+        <div class="container-form">
+            <form action="/insert" method="POST">
+                <div class="container-input">
+                    <label>Age :</label>
+                    <input type="text" name="Age" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Systolic Blood Pressure:</label>
+                    <input type="text" name="SystolicBP" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Diastolic Blood Pressure:</label>
+                    <input type="text" name="DiastolicBP" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Blood Sugar:</label>
+                    <input type="text" name="BS" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Body Temperature:</label>
+                    <input type="text" name="BodyTemp" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Heart Rate (per minute):</label>
+                    <input type="text" name="HeartRate" id="" />
+                </div>
+                <br>
+                <div class="container-input">
+                    <label>Risk Level:</label>
+                    <input type="text" name="RiskLevel" id="" />
+                </div>
+                <br>
+                <br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+    <br>
+    <a href="{{url_for('logout')}}">Press here to logout</a>
+</body>
+
+</html>
