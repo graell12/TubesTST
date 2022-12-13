@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, redirect, session, make_response, url_for
 from flask_restful import Resource, Api
 from flaskext.mysql import MySQL
 from functools import wraps
@@ -21,6 +21,8 @@ app.config['MYSQL_DATABASE_USER'] = 'usertst'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'passwordtst'
 app.config['MYSQL_DATABASE_DB'] = 'tst'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+storedtoken = []
 
 db.init_app(app)
 
@@ -46,23 +48,12 @@ def token_required(f) :
             return response
         return f(*args, **kwargs)
     return decorated
-    
 
-#Get All
+# Home
 class MainPage(Resource):
-    @token_required
     def get(self):
-        try:
-            conn = db.connect()
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM MATERNAL_RISK LIMIT 10")
-            rows = cursor.fetchall()
-            return jsonify(rows)
-        except Exception as e:
-            print(e)
-        finally:
-            cursor.close()
-            conn.close()
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('home.html'), 200, headers)
 
 class View(Resource):
     @token_required
@@ -192,6 +183,10 @@ class Register(Resource) :
         else:
             return False
 
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('register.html'), 200, headers)
+
     def post(self):
         conn = db.connect()
         cursor = conn.cursor()
@@ -224,7 +219,8 @@ class Register(Resource) :
             conn.commit()
             response = jsonify('User registered successfully.')
             response.status_code = 201
-            return response
+            # headers = {'Content-Type': 'text/html'}
+            return redirect(url_for("mainpage"))
         except Exception as e:
             print(e)
             response = jsonify(message = 'Failed to add data to the dataset.', error = str(e))
@@ -232,9 +228,12 @@ class Register(Resource) :
         finally:
             cursor.close()
             conn.close()
-            return(response)
 
 class Login(Resource):
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('login.html'), 200, headers)
+
     def post(self):
         conn = db.connect()
         cursor = conn.cursor()
@@ -258,6 +257,8 @@ class Login(Resource):
             if bcrypt.checkpw(password.encode('utf-8'), rows[0][2].encode('utf-8')):
                 token = jwt.encode({'username': username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
                 response = jsonify(message = 'User logged in successfully.', token = token)
+                session['name'] = username
+                storedtoken.append(token)
                 # create token for user
                 response.status_code = 200
                 return response
@@ -272,10 +273,16 @@ class Login(Resource):
         finally:
             cursor.close()
             conn.close()
-            return(response)
+
+class Logout(Resource):
+    def get(self):
+        session.clear()
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('home.html'), 200, headers)
 
 # API Resource Routes
 api.add_resource(Login, '/login')
+api.add_resource(Logout, '/logout')
 api.add_resource(Register, '/register')
 api.add_resource(MainPage, '/')
 api.add_resource(View, '/maternalrisk')
