@@ -22,16 +22,15 @@ app.config['MYSQL_DATABASE_PASSWORD'] = 'passwordtst'
 app.config['MYSQL_DATABASE_DB'] = 'tst'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 
-storedtoken = []
-
 db.init_app(app)
 
 def token_required(f) :
     @wraps(f)
     def decorated(*args, **kwargs) :
-        token = None
-        if 'x-access-tokens' in request.headers:
-           token = request.headers['x-access-tokens']
+        # token = None
+        # if 'x-access-tokens' in request.headers:
+        #    token = request.headers['x-access-tokens']
+        token = session['token']
         if not token :
             response = jsonify('Token is missing!.')
             response.status_code = 403
@@ -72,10 +71,11 @@ class View(Resource):
 
 class ViewbyID(Resource):
     @token_required
-    def get(self, get_idmr):
+    def post(self):
         try:
             conn = db.connect()
             cursor = conn.cursor()
+            get_idmr = request.form['id']
             cursor.execute(f"""SELECT * FROM MATERNAL_RISK WHERE idmr = {get_idmr}""")
             rows = cursor.fetchall()
             return jsonify(rows)
@@ -87,11 +87,11 @@ class ViewbyID(Resource):
 
 class ViewRisk(Resource):
     @token_required
-    def get(self, get_risk):
+    def post(self):
         try:
             conn = db.connect()
             cursor = conn.cursor()
-            get_risk = get_risk.replace("-", " ")
+            get_risk = request.form['Risk']
             cursor.execute(f"""SELECT * FROM MATERNAL_RISK WHERE RiskLevel = '{get_risk}'""")
             rows = cursor.fetchall()
             return jsonify(rows)
@@ -103,6 +103,10 @@ class ViewRisk(Resource):
 
 class Insert(Resource):
     @token_required
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('insert.html'), 200, headers)
+
     def post(self):
         try:
             conn = db.connect()
@@ -126,14 +130,19 @@ class Insert(Resource):
         finally:
             cursor.close()
             conn.close()
-            return(response)
+            return response
 
 class Update(Resource):
     @token_required
-    def put(self, up_idmr):
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('update.html'), 200, headers)
+
+    def post(self):
         try:
             conn = db.connect()
             cursor = conn.cursor()
+            up_idmr = int(request.form['id'])
             _womenage = request.form['Age']
             _systolicbp = int(request.form['SystolicBP'])
             _diastolicbp = int(request.form['DiastolicBP'])
@@ -155,12 +164,17 @@ class Update(Resource):
             conn.close()
             return(response)
 
-class Erase(Resource):
+class Delete(Resource):
     @token_required
-    def delete(self, del_idmr):
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('delete.html'), 200, headers)
+
+    def post(self):
         try:
             conn = db.connect()
             cursor = conn.cursor()
+            del_idmr = int(request.form['id'])
             delval = f"""DELETE FROM MATERNAL_RISK WHERE IDMR = {del_idmr}"""
             cursor.execute(delval)
             conn.commit()
@@ -258,10 +272,10 @@ class Login(Resource):
                 token = jwt.encode({'username': username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
                 response = jsonify(message = 'User logged in successfully.', token = token)
                 session['name'] = username
-                storedtoken.append(token)
+                session['token'] = token
                 # create token for user
                 response.status_code = 200
-                return response
+                return redirect(url_for("dashboard"))         
             else:
                 response = jsonify('Incorrect password.')
                 response.status_code = 400
@@ -280,17 +294,31 @@ class Logout(Resource):
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('home.html'), 200, headers)
 
+class Dashboard(Resource):
+    @token_required
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('dashboard.html'), 200, headers)
+
+class ViewMenu(Resource):
+    @token_required
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('viewmenu.html'), 200, headers)
+
 # API Resource Routes
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 api.add_resource(Register, '/register')
 api.add_resource(MainPage, '/')
-api.add_resource(View, '/maternalrisk')
-api.add_resource(ViewRisk, '/maternalrisk/<string:get_risk>')
-api.add_resource(ViewbyID, '/maternalrisk/<int:get_idmr>')
-api.add_resource(Insert, '/maternalrisk/insert')
-api.add_resource(Update, '/maternalrisk/update/<int:up_idmr>') 
-api.add_resource(Erase, '/maternalrisk/delete/<int:del_idmr>')
+api.add_resource(Dashboard, '/dashboard')
+api.add_resource(ViewMenu, '/view-menu')
+api.add_resource(View, '/view-all')
+api.add_resource(ViewRisk, '/view-risk')
+api.add_resource(ViewbyID, '/view-id')
+api.add_resource(Insert, '/insert')
+api.add_resource(Update, '/update') 
+api.add_resource(Delete, '/delete')
 
 if __name__=="__main__":
     app.run(debug=True)
