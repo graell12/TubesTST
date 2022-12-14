@@ -332,4 +332,4 @@ api.add_resource(Update, '/update')
 api.add_resource(Delete, '/delete')
 
 if __name__=="__main__":
-    app.run(debug=True, port=80)
+    app.run(debug=True, port=5000)
