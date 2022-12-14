@@ -54,6 +54,21 @@ class MainPage(Resource):
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('home.html'), 200, headers)
 
+# Dashboard
+class Dashboard(Resource):
+    @token_required
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('dashboard.html'), 200, headers)
+
+# Menu to different types of View
+class ViewMenu(Resource):
+    @token_required
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('viewmenu.html'), 200, headers)
+
+# View all data
 class View(Resource):
     @token_required
     def get(self):
@@ -69,6 +84,7 @@ class View(Resource):
             cursor.close()
             conn.close()
 
+# View data by ID
 class ViewbyID(Resource):
     @token_required
     def post(self):
@@ -85,6 +101,7 @@ class ViewbyID(Resource):
             cursor.close()
             conn.close()
 
+#View data by Risk
 class ViewRisk(Resource):
     @token_required
     def post(self):
@@ -101,6 +118,7 @@ class ViewRisk(Resource):
             cursor.close()
             conn.close()
 
+# INsert data to DB
 class Insert(Resource):
     @token_required
     def get(self):
@@ -132,6 +150,7 @@ class Insert(Resource):
             conn.close()
             return response
 
+# Update data to DB
 class Update(Resource):
     @token_required
     def get(self):
@@ -164,6 +183,7 @@ class Update(Resource):
             conn.close()
             return(response)
 
+# Delete data from DB
 class Delete(Resource):
     @token_required
     def get(self):
@@ -189,6 +209,7 @@ class Delete(Resource):
             conn.close()
             return(response)
 
+# Register Account
 class Register(Resource) :
     def check_password(self, password) :
         if len(password) >= 6 and len(password) <= 20 and any(char.isdigit() for char in password) \
@@ -243,6 +264,7 @@ class Register(Resource) :
             cursor.close()
             conn.close()
 
+# Login Account
 class Login(Resource):
     def get(self):
         headers = {'Content-Type': 'text/html'}
@@ -288,23 +310,12 @@ class Login(Resource):
             cursor.close()
             conn.close()
 
+# Logout
 class Logout(Resource):
     def get(self):
         session.clear()
         headers = {'Content-Type': 'text/html'}
         return make_response(render_template('home.html'), 200, headers)
-
-class Dashboard(Resource):
-    @token_required
-    def get(self):
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('dashboard.html'), 200, headers)
-
-class ViewMenu(Resource):
-    @token_required
-    def get(self):
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('viewmenu.html'), 200, headers)
 
 # API Resource Routes
 api.add_resource(Login, '/login')
